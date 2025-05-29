@@ -1,0 +1,42 @@
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Hadoop logs and temp files
+logs/
+tmp/
+*.tmp
+
+# Hive metastore and warehouse directories
+metastore_db/
+warehouse/
+derby.log
+
+# CSV data files
+*.csv
+
+# Hadoop output directories
+output/
+_output/
+part-*
+
+# Eclipse/IntelliJ/VSCode project files
+*.iml
+.idea/
+*.ipr
+*.iws
+*.suo
+*.user
+*.sln
+*.sw?
+*.bak
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Maven/Gradle build directories
+target/
+build/

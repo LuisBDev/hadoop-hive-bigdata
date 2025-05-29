@@ -58,19 +58,19 @@ Sigue estos pasos para cargar y consultar una tabla de ejemplo en Hive:
 
 ```sh
 # 1. Copiar la carpeta scripts al contenedor de HiveServer2
-# (esto incluye los scripts y el archivo CSV de ejemplo)
+# (esto incluye los scripts y el archivo WDI_data.csv)
 docker cp scripts hadoop-hive-bigdata-hive-server-1:/tmp/scripts
 
 # 2. Acceder al contenedor de HiveServer2
 docker exec -it hadoop-hive-bigdata-hive-server-1 bash
 
-# 3. Ejecutar el script de creación de la tabla
+# 3. Ejecutar el script de creación de la tabla para World Development Indicators
 hive -f /tmp/scripts/create_big_table.hql
 
-# 4. Cargar datos en la tabla
-hive -e "LOAD DATA LOCAL INPATH '/tmp/scripts/big_table.csv' INTO TABLE big_table"
+# 4. Cargar datos en la tabla wdi_2020
+hive -f /tmp/scripts/load_big_table.hql
 
-# 5. Query para verificar que se cargaron los datos
+# 5. Ejecutar queries y agregaciones de ejemplo
 hive -f /tmp/scripts/query_big_table.hql
 ```
 

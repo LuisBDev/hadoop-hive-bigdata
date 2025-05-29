@@ -1,14 +1,17 @@
--- Ejemplos de queries sobre la tabla big_table
+-- Ejemplos de queries sobre la tabla wdi_2020
 
--- Contar registros
-SELECT COUNT(*) FROM big_table;
+-- Contar registros totales
+SELECT COUNT(*) AS total_registros FROM wdi_2020;
 
 -- Obtener los primeros 10 registros
-SELECT * FROM big_table LIMIT 10;
+SELECT * FROM wdi_2020 LIMIT 10;
 
--- Consulta de agregación de ejemplo
-SELECT col1, COUNT(*) as total
-FROM big_table
-GROUP BY col1
-ORDER BY total DESC
+-- Top 10 indicadores con mayor valor promedio en 2020
+SELECT IndicatorName, AVG(Value) as avg_value
+FROM wdi_2020
+WHERE Year = 2020
+GROUP BY IndicatorName
+ORDER BY avg_value DESC
 LIMIT 10;
+
+

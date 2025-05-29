@@ -1,3 +1,3 @@
--- Script para cargar los datos del CSV a la tabla big_table
--- Asegúrate de subir el archivo big_table.csv a /tmp/big_table.csv en el contenedor
-LOAD DATA LOCAL INPATH '/tmp/big_table.csv' INTO TABLE big_table;
+-- Script para cargar los datos del CSV a la tabla wdi_2020
+-- Asegúrate de subir el archivo WDI_data.csv a /tmp/WDI_data.csv en el contenedor
+LOAD DATA LOCAL INPATH '/tmp/scripts/WDI_data.csv' INTO TABLE wdi_2020;
