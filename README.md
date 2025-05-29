@@ -52,9 +52,33 @@ Dentro del contenedor, ejecuta:
 beeline -u jdbc:hive2://localhost:10000
 ```
 
+## 3. Cargar y consultar datos de ejemplo en Hive
+
+Sigue estos pasos para cargar y consultar una tabla de ejemplo en Hive:
+
+```sh
+# 1. Copiar la carpeta scripts al contenedor de HiveServer2
+# (esto incluye los scripts y el archivo CSV de ejemplo)
+docker cp scripts hadoop-hive-bigdata-hive-server-1:/tmp/scripts
+
+# 2. Acceder al contenedor de HiveServer2
+docker exec -it hadoop-hive-bigdata-hive-server-1 bash
+
+# 3. Ejecutar el script de creación de la tabla
+hive -f /tmp/scripts/create_big_table.hql
+
+# 4. Cargar datos en la tabla
+hive -e "LOAD DATA LOCAL INPATH '/tmp/scripts/big_table.csv' INTO TABLE big_table"
+
+# 5. Query para verificar que se cargaron los datos
+hive -f /tmp/scripts/query_big_table.hql
+```
+
+Esto creará una tabla de ejemplo, cargará los datos dummy y mostrará los resultados de las consultas.
 
 
-## Variables de entorno y configuración
+
+## 4. Variables de entorno y configuración
 
 - Configuración de servicios y credenciales en `hadoop-hive.env`.
 - Configuración personalizada de Hue en `hue-overrides.ini`.
@@ -64,6 +88,5 @@ beeline -u jdbc:hive2://localhost:10000
 ```sh
 docker-compose down
 ```
-
 
 
