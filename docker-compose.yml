@@ -1,77 +1,81 @@
 services:
-
   namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
-    container_name: namenode
-    environment:
-      CLUSTER_NAME: hive-cluster
-    ports:
-      - "9870:9870"
+    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
     volumes:
       - namenode:/hadoop/dfs/name
-    networks:
-      - hive-net
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop-hive.env
+    ports:
+      - "50070:50070"
 
   datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode
-    environment:
-      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
-    depends_on:
-      - namenode
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
     volumes:
       - datanode:/hadoop/dfs/data
-    networks:
-      - hive-net
-
-  hive-metastore-db:
-    image: postgres:13
-    container_name: metastore-db
+    env_file:
+      - ./hadoop-hive.env
     environment:
-      POSTGRES_DB: metastore
-      POSTGRES_USER: hive
-      POSTGRES_PASSWORD: hive
-    volumes:
-      - metastore-db:/var/lib/postgresql/data
-    networks:
-      - hive-net
-
-  hive-metastore:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: hive-metastore
-    environment:
-      HIVE_METASTORE_DB_TYPE: postgres
-      HIVE_METASTORE_DB_HOST: metastore-db
-      HIVE_METASTORE_DB_NAME: metastore
-      HIVE_METASTORE_DB_USER: hive
-      HIVE_METASTORE_DB_PASS: hive
-      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
-    depends_on:
-      - hive-metastore-db
-      - namenode
+      SERVICE_PRECONDITION: "namenode:50070"
     ports:
-      - "9083:9083"
-    networks:
-      - hive-net
+      - "50075:50075"
+
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop2.7.4-java8
+    environment:
+      SERVICE_PRECONDITION: "namenode:50070 datanode:50075"
+    env_file:
+      - ./hadoop-hive.env
 
   hive-server:
     image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: hive-server
+    env_file:
+      - ./hadoop-hive.env
     environment:
-      HIVE_METASTORE_URI: thrift://hive-metastore:9083
-      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
-    depends_on:
-      - hive-metastore
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
+      SERVICE_PRECONDITION: "hive-metastore:9083"
     ports:
       - "10000:10000"
-    networks:
-      - hive-net
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    env_file:
+      - ./hadoop-hive.env
+    command: /opt/hive/bin/hive --service metastore
+    environment:
+      SERVICE_PRECONDITION: "namenode:50070 datanode:50075 hive-metastore-postgresql:5432 resourcemanager:8088"
+    ports:
+      - "9083:9083"
+
+  hive-metastore-postgresql:
+    image: bde2020/hive-metastore-postgresql:2.3.0
+    ports:
+      - "5432:5432"
+
+  huedb:
+    image: postgres:12.1-alpine
+    volumes:
+      - pg_data:/var/lib/postgresl/data/
+    ports:
+      - "5432"
+    env_file:
+      - ./hadoop-hive.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:50070 datanode:50075 hive-metastore-postgresql:5432 resourcemanager:8088 hive-metastore:9083"
+
+  hue:
+    image: gethue/hue:4.6.0
+    environment:
+      SERVICE_PRECONDITION: "namenode:50070 datanode:50075 hive-metastore-postgresql:5432 resourcemanager:8088 hive-metastore:9083 huedb:5000"
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./hue-overrides.ini:/usr/share/hue/desktop/conf/hue-overrides.ini
+    links:
+      - huedb
 
 volumes:
   namenode:
   datanode:
-  metastore-db:
-
-
-networks:
-  hive-net:
+  pg_data:
